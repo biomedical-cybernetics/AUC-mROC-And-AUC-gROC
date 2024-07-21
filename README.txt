@@ -4,6 +4,7 @@ MATLAB code for prediction evaluation using the following measures:
 - area under precision-recall curve (AUC-PR)
 - area under ROC curve (AUC-ROC)
 - area under mROC curve (AUC-mROC)
+- area under mROC curve (AUC-gROC)
 - normalized discounted cumulative gain (NDCG)
 - matthews correlation coefficient (MCC)
 
