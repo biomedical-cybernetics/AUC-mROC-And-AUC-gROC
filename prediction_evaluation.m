@@ -16,7 +16,7 @@ function measures = prediction_evaluation(scores, labels)
 
 validateattributes(scores, {'numeric'}, {'vector','finite'})
 S = length(scores);
-validateattributes(labels, {'numeric'}, {'vector','binary','numel',S})
+validateattributes(labels, {'numeric', 'logical'}, {'vector','binary','numel',S})
 P = full(sum(labels==1));
 N = S - P;
 if P==0 || N==0
