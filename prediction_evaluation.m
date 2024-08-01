@@ -11,6 +11,7 @@ function measures = prediction_evaluation(scores, labels)
 %   auc_pr    - area under precision-recall curve
 %   auc_roc   - area under roc curve
 %   auc_mroc  - area under m-roc curve
+%   auc_groc  - area under g-roc curve
 %   ndcg - normalized discounted cumulative gain
 %   mcc - matthews correlation coefficient
 
@@ -30,7 +31,6 @@ measures.ndcg = compute_ndcg(scores, labels, P);
 measures.mcc = compute_mcc(scores, labels, P, N);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 function measures = compute_curves_measures(scores, labels, S, P, N)
 
 [scores,idx] = sort(-scores, 'ascend');
@@ -45,10 +45,15 @@ tp_rand = fp .* (P/N);
 prec = tp./(1:S)';
 tpr = tp/P;
 fpr = fp/N;
-tpr_m = log(1+tp)/log(1+P);
-fpr_m = log(1+fp)/log(1+N);
-tpr_m_rand = log(1+tp_rand)/log(1+P);
-tpr_m_norm = (tpr_m-tpr_m_rand) ./ (1-tpr_m_rand) .* (1-fpr_m) + fpr_m; tpr_m_norm(isnan(tpr_m_norm)) = 1;
+tpr_um = log(1+tp)/log(1+P);  % un-normalized
+fpr_um = log(1+fp)/log(1+N);   
+tpr_um_rand = log(1+tp_rand)/log(1+P);
+sympref('HeavisideAtOrigin',1); %  set the origin to 1
+h = heaviside(tpr_um-tpr_um_rand);
+tpr_m = (fpr_um-h).*(tpr_um-h)./(tpr_um_rand-h) + h;
+tpr_m(isnan(tpr_m)) = 1;
+tpr_g = (1-min(1,P/N))*tpr_m + min(1, P/N)*tpr;
+fpr_g = (1-min(1,P/N))*fpr_um + min(1, P/N)*fpr;
 
 measures.prec = prec(P);
 if P==1
@@ -60,8 +65,10 @@ end
 prec = prec(ut);
 tpr = [0; tpr(ut)];
 fpr = [0; fpr(ut)];
-fpr_m = [0; fpr_m(ut)];
-tpr_m_norm = [0; tpr_m_norm(ut)];
+fpr_um = [0; fpr_um(ut)];
+tpr_m = [0; tpr_m(ut)];
+tpr_g = [0; tpr_g(ut)];
+fpr_g = [0; fpr_g(ut)];
 
 if all(tpr(2:end)==1)
     measures.auc_pr = prec(1);
@@ -69,7 +76,8 @@ else
     measures.auc_pr = trapz(tpr(2:end),prec) / (1-tpr(2));
 end
 measures.auc_roc = trapz(fpr,tpr);
-measures.auc_mroc = trapz(fpr_m,tpr_m_norm);
+measures.auc_mroc = trapz(fpr_um,tpr_m);
+measures.auc_groc = trapz(fpr_g, tpr_g);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
