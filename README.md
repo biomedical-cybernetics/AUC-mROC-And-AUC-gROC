@@ -25,7 +25,7 @@ MATLAB code for prediction evaluation using the following measures:
 ### CONTACT ###
 
 For any problem, please contact:
-Junda Chen: atpeak666@gmail.com 
+Junda Chen: junda.ora.chen@gmail.com 
 Alessandro Muscoloni: alessandro.muscoloni@gmail.com
 Carlo Vittorio Cannistraci: kalokagathos.agon@gmail.com
 
